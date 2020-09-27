@@ -5,6 +5,8 @@ package httplog
 
 import (
 	"bytes"
+	"fmt"
+	"io"
 	"net/http"
 	"net/http/httputil"
 )
@@ -32,14 +34,39 @@ func NewRoundTripLogger(transport http.RoundTripper, reqf, resf func([]byte)) *R
 }
 
 // NewPrefixedRoundTripLogger creates a new HTTP transport that logs the raw
-// (outgoing) HTTP request and response to the provided standard logger funcs.
+// (outgoing) HTTP request and response to the provided logger.
+//
 // Prefixes requests and responses with "-> " and "<-", respectively. Adds an
 // additional blank line ("\n\n") to the output of requests and responses.
-func NewPrefixedRoundTripLogger(transport http.RoundTripper, logf func(string, ...interface{})) *RoundTripLogger {
+//
+// Valid types for logger:
+//
+//     func(string, ...interface{}) // fmt.Printf
+//     func(string, ...interface{}) // log.Printf
+//     io.Writer
+//
+// Note: will panic() when an unknown logger type is passed.
+func NewPrefixedRoundTripLogger(transport http.RoundTripper, logger interface{}) *RoundTripLogger {
 	nl := []byte("\n")
-	f := func(prefix []byte, buf []byte) {
-		buf = append(prefix, bytes.ReplaceAll(buf, nl, append(nl, prefix...))...)
-		logf("%s\n\n", string(buf))
+	var f func([]byte, []byte)
+	switch logf := logger.(type) {
+	case io.Writer:
+		f = func(prefix []byte, buf []byte) {
+			buf = append(prefix, bytes.ReplaceAll(buf, nl, append(nl, prefix...))...)
+			_, _ = logf.Write(append(buf, '\n', '\n'))
+		}
+	case func(string, ...interface{}) (int, error): // fmt.Printf
+		f = func(prefix []byte, buf []byte) {
+			buf = append(prefix, bytes.ReplaceAll(buf, nl, append(nl, prefix...))...)
+			_, _ = logf("%s\n\n", string(buf))
+		}
+	case func(string, ...interface{}): // log.Printf
+		f = func(prefix []byte, buf []byte) {
+			buf = append(prefix, bytes.ReplaceAll(buf, nl, append(nl, prefix...))...)
+			logf("%s\n\n", string(buf))
+		}
+	default:
+		panic(fmt.Sprintf("unable to convert logf with type %T", logf))
 	}
 	return NewRoundTripLogger(
 		transport,
