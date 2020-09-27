@@ -7,19 +7,20 @@ response.
 ## Example
 
 ```go
+// _example/main.go
 package main
 
 import (
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/kenshaw/httplog"
 )
 
 func main() {
-	transport := httplog.NewPrefixedRoundTripLogger(nil, log.Printf)
 	cl := &http.Client{
-		Transport: transport,
+		Transport: httplog.NewPrefixedRoundTripLogger(nil, os.Stdout),
 	}
 	req, err := http.NewRequest("GET", "https://google.com", nil)
 	if err != nil {
