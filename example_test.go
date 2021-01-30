@@ -12,7 +12,7 @@ import (
 	"github.com/kenshaw/httplog"
 )
 
-func ExampleRoundTripLoggerWriter() {
+func ExampleRoundTripLogger_writer() {
 	ts := httptest.NewServer(writeHTML(`<body>hello</body>`))
 	defer ts.Close()
 
@@ -45,7 +45,7 @@ func ExampleRoundTripLoggerWriter() {
 	// <- <body>hello</body>
 }
 
-func ExampleRoundTripLoggerPrintf() {
+func ExampleRoundTripLogger_printf() {
 	ts := httptest.NewServer(writeHTML(`<body>hello</body>`))
 	defer ts.Close()
 
@@ -77,7 +77,7 @@ func ExampleRoundTripLoggerPrintf() {
 	// <- <body>hello</body>
 }
 
-func ExampleRoundTripLoggerLogf() {
+func ExampleRoundTripLogger_logf() {
 	ts := httptest.NewServer(writeHTML(`<body>hello</body>`))
 	defer ts.Close()
 
@@ -109,7 +109,7 @@ func ExampleRoundTripLoggerLogf() {
 	// <- <body>hello</body>
 }
 
-func ExampleRoundTripLoggerWithReqResBody() {
+func ExampleRoundTripLogger_withReqResBody() {
 	ts := httptest.NewServer(writeHTML(`<body>hello</body>`))
 	defer ts.Close()
 
@@ -175,6 +175,6 @@ func logf(s string, v ...interface{}) {
 func writeHTML(content string) http.Handler {
 	return http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
 		res.Header().Set("Content-Type", "text/html")
-		io.WriteString(res, strings.TrimSpace(content))
+		_, _ = io.WriteString(res, strings.TrimSpace(content))
 	})
 }
