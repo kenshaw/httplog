@@ -109,8 +109,42 @@ func ExampleRoundTripLoggerLogf() {
 	// <- <body>hello</body>
 }
 
-var cleanRE = regexp.MustCompile(`\n(->|<-) (Host|Date):.*`)
-var spaceRE = regexp.MustCompile(`(?m)\s+$`)
+func ExampleRoundTripLoggerWithReqResBody() {
+	ts := httptest.NewServer(writeHTML(`<body>hello</body>`))
+	defer ts.Close()
+
+	// do http request (logf has same signature as log.Printf)
+	transport := httplog.NewPrefixedRoundTripLogger(nil, logf, httplog.WithReqResBody(false, false))
+	cl := &http.Client{
+		Transport: transport,
+	}
+	req, err := http.NewRequest("GET", ts.URL, nil)
+	if err != nil {
+		panic(err)
+	}
+	res, err := cl.Do(req)
+	if err != nil {
+		panic(err)
+	}
+	defer res.Body.Close()
+
+	// Output:
+	// -> GET / HTTP/1.1
+	// -> User-Agent: Go-http-client/1.1
+	// -> Accept-Encoding: gzip
+	// ->
+	// ->
+	// <- HTTP/1.1 200 OK
+	// <- Content-Length: 18
+	// <- Content-Type: text/html
+	// <-
+	// <-
+}
+
+var (
+	cleanRE = regexp.MustCompile(`\n(->|<-) (Host|Date):.*`)
+	spaceRE = regexp.MustCompile(`(?m)\s+$`)
+)
 
 func NewMyWriter(w io.Writer) *MyWriter {
 	return &MyWriter{w: w}

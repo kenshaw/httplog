@@ -18,7 +18,7 @@
 //		cl := &http.Client{
 //			Transport: httplog.NewPrefixedRoundTripLogger(nil, os.Stdout),
 //			// without request or response body
-//			// Transport: httplog.NewPrefixedRoundTripLogger(nil, os.Stdout, httplog.WithResReqBody(false, false)),
+//			// Transport: httplog.NewPrefixedRoundTripLogger(nil, os.Stdout, httplog.WithReqResBody(false, false)),
 //		}
 //		req, err := http.NewRequest("GET", "https://google.com", nil)
 //		if err != nil {
@@ -141,9 +141,9 @@ func (l *RoundTripLogger) RoundTrip(req *http.Request) (*http.Response, error) {
 // Option is a roundtrip logger option.
 type Option func(*RoundTripLogger)
 
-// WithResReqBody is a roundtrip logger option to set whether or not to log the
+// WithReqResBody is a roundtrip logger option to set whether or not to log the
 // request and response body. Useful when body content is binary.
-func WithResReqBody(req, res bool) Option {
+func WithReqResBody(req, res bool) Option {
 	return func(l *RoundTripLogger) {
 		l.noReqBody, l.noResBody = !req, !res
 	}
