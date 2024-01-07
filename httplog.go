@@ -1,39 +1,6 @@
-// Package httplog provides a standard http.RoundTripper transport that can be
-// used with standard HTTP clients to log the raw (outgoing) HTTP request and
-// response.
-//
-// Example:
-//	// _example/example.go
-//	package main
-//
-//	import (
-//		"log"
-//		"net/http"
-//		"os"
-//
-//		"github.com/kenshaw/httplog"
-//	)
-//
-//	func main() {
-//		cl := &http.Client{
-//			Transport: httplog.NewPrefixedRoundTripLogger(nil, os.Stdout),
-//			// without request or response body
-//			// Transport: httplog.NewPrefixedRoundTripLogger(nil, os.Stdout, httplog.WithReqResBody(false, false)),
-//		}
-//		req, err := http.NewRequest("GET", "https://google.com", nil)
-//		if err != nil {
-//			log.Fatal(err)
-//		}
-//		res, err := cl.Do(req)
-//		if err != nil {
-//			log.Fatal(err)
-//		}
-//		defer res.Body.Close()
-//	}
-//
-// NewPrefixedTripLogger provides a convenient wrapper around using the
-// standard library's io.Writer, and standard output func signatures for
-// fmt.Printf and log.Printf.
+// Package httplog provides a standard [http.RoundTripper] transport that can
+// be used with standard HTTP clients to log the raw (outgoing) HTTP request
+// and response.
 package httplog
 
 import (
@@ -47,9 +14,9 @@ import (
 // DefaultTransport is the default transport used by the HTTP logger.
 var DefaultTransport = http.DefaultTransport
 
-// RoundTripLogger provides a standard http.RoundTripper transport that can be
-// used with standard HTTP clients to log the raw (outgoing) HTTP request and
-// response.
+// RoundTripLogger provides a standard [http.RoundTripper] transport that can
+// be used with standard HTTP clients to log the raw (outgoing) HTTP request
+// and response.
 type RoundTripLogger struct {
 	transport http.RoundTripper
 	reqf      func([]byte)
@@ -80,9 +47,9 @@ func NewRoundTripLogger(transport http.RoundTripper, reqf, resf func([]byte), op
 //
 // Valid types for logger:
 //
-//     io.Writer
-//     func(string, ...interface{}) (int, error) // fmt.Printf
-//     func(string, ...interface{}) // log.Printf
+//	io.Writer
+//	func(string, ...interface{}) (int, error) // fmt.Printf
+//	func(string, ...interface{}) // log.Printf
 //
 // Note: will panic() when an unknown logger type is passed.
 func NewPrefixedRoundTripLogger(transport http.RoundTripper, logger interface{}, opts ...Option) *RoundTripLogger {
@@ -115,7 +82,7 @@ func NewPrefixedRoundTripLogger(transport http.RoundTripper, logger interface{},
 	)
 }
 
-// RoundTrip satisfies the http.RoundTripper interface.
+// RoundTrip satisfies the [http.RoundTripper] interface.
 func (l *RoundTripLogger) RoundTrip(req *http.Request) (*http.Response, error) {
 	transport := l.transport
 	if transport == nil {
