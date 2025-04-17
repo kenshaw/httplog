@@ -52,7 +52,7 @@ func NewRoundTripLogger(transport http.RoundTripper, reqf, resf func([]byte), op
 //	func(string, ...interface{}) // log.Printf
 //
 // Note: will panic() when an unknown logger type is passed.
-func NewPrefixedRoundTripLogger(transport http.RoundTripper, logger interface{}, opts ...Option) *RoundTripLogger {
+func NewPrefixedRoundTripLogger(transport http.RoundTripper, logger any, opts ...Option) *RoundTripLogger {
 	nl := []byte("\n")
 	var f func([]byte, []byte)
 	switch logf := logger.(type) {
@@ -61,12 +61,12 @@ func NewPrefixedRoundTripLogger(transport http.RoundTripper, logger interface{},
 			buf = append(prefix, bytes.ReplaceAll(buf, nl, append(nl, prefix...))...)
 			_, _ = logf.Write(append(buf, '\n', '\n'))
 		}
-	case func(string, ...interface{}) (int, error): // fmt.Printf
+	case func(string, ...any) (int, error): // fmt.Printf
 		f = func(prefix []byte, buf []byte) {
 			buf = append(prefix, bytes.ReplaceAll(buf, nl, append(nl, prefix...))...)
 			_, _ = logf("%s\n\n", string(buf))
 		}
-	case func(string, ...interface{}): // log.Printf
+	case func(string, ...any): // log.Printf
 		f = func(prefix []byte, buf []byte) {
 			buf = append(prefix, bytes.ReplaceAll(buf, nl, append(nl, prefix...))...)
 			logf("%s\n\n", string(buf))

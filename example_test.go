@@ -160,13 +160,13 @@ func (w *MyWriter) Write(buf []byte) (int, error) {
 	return os.Stdout.Write(append(clean, '\n'))
 }
 
-func printf(s string, v ...interface{}) (int, error) {
+func printf(s string, v ...any) (int, error) {
 	clean := cleanRE.ReplaceAllString(fmt.Sprintf(s, v...), "")
 	clean = spaceRE.ReplaceAllString(clean, "")
 	return fmt.Println(clean)
 }
 
-func logf(s string, v ...interface{}) {
+func logf(s string, v ...any) {
 	clean := cleanRE.ReplaceAllString(fmt.Sprintf(s, v...), "")
 	clean = spaceRE.ReplaceAllString(clean, "")
 	fmt.Println(clean)
